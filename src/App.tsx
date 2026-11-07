@@ -27,9 +27,24 @@ type RouteState =
 
 const LOCAL_CACHE_KEY = 'atelier_club_state_v1';
 
+function getEffectivePath(): string {
+  if (window.location.hash && window.location.hash.startsWith('#/')) {
+    return window.location.hash.slice(1);
+  }
+  const base = (import.meta.env?.BASE_URL || '/').replace(/\/+$/, '');
+  let p = window.location.pathname || '/';
+  if (base && base !== '/' && p.startsWith(base)) {
+    p = p.slice(base.length) || '/';
+  }
+  if (p.endsWith('/index.html')) {
+    p = p.slice(0, -'/index.html'.length) || '/';
+  }
+  return p;
+}
+
 function parseLocationToRoute(pathname: string): RouteState {
   const clean = decodeURIComponent(pathname || '/').replace(/\/+$/, '') || '/';
-  if (clean === '/') return { view: 'directory' };
+  if (clean === '/' || clean.endsWith('.html')) return { view: 'directory' };
   if (clean === '/customize') return { view: 'customize', tab: 'assets' };
   if (clean === '/premium/layout') return { view: 'customize', tab: 'layout' };
   if (clean === '/premium/metadata') return { view: 'customize', tab: 'seo' };
@@ -55,28 +70,70 @@ export function App() {
   const [templates, setTemplates] = useState<CommunityTemplate[]>(INITIAL_TEMPLATES);
   const [activeHandle, setActiveHandle] = useState<string>(INITIAL_MEMBERS[0].handle);
   const [route, setRoute] = useState<RouteState>(() =>
-    parseLocationToRoute(window.location.pathname)
+    parseLocationToRoute(getEffectivePath())
   );
 
   const navigate = useCallback((path: string, nextRoute?: RouteState) => {
-    window.history.pushState({}, '', path);
-    setRoute(nextRoute || parseLocationToRoute(path));
+    const base = (import.meta.env?.BASE_URL || '/').replace(/\/+$/, '');
+    const normalized = path.startsWith('/') ? path : `/${path}`;
+    try {
+      if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+        const fullPath = base && base !== '/' ? `${base}${normalized === '/' ? '/' : normalized}` : normalized;
+        window.history.pushState({}, '', fullPath);
+      } else {
+        window.location.hash = normalized;
+      }
+    } catch {
+      try {
+        window.location.hash = normalized;
+      } catch {
+        // In-memory state route still updates cleanly inside strict sandboxes
+      }
+    }
+    setRoute(nextRoute || parseLocationToRoute(normalized));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
   useEffect(() => {
-    const onPop = () => setRoute(parseLocationToRoute(window.location.pathname));
+    const onPop = () => setRoute(parseLocationToRoute(getEffectivePath()));
     window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
+    window.addEventListener('hashchange', onPop);
+    return () => {
+      window.removeEventListener('popstate', onPop);
+      window.removeEventListener('hashchange', onPop);
+    };
   }, []);
 
   // Hydrate from persistent backend API (/api/state -> /api/seed) with localStorage fallback
   useEffect(() => {
     let cancelled = false;
+    const loadLocalCache = () => {
+      try {
+        const cached = localStorage.getItem(LOCAL_CACHE_KEY);
+        if (cached && !cancelled) {
+          const parsed = JSON.parse(cached) as {
+            club: ClubSettings;
+            members: MemberProfile[];
+            templates: CommunityTemplate[];
+          };
+          if (parsed.club) setClub(parsed.club);
+          if (parsed.members?.length) setMembers(parsed.members);
+          if (parsed.templates?.length) setTemplates(parsed.templates);
+        }
+      } catch {
+        // ignore corrupt or sandboxed local cache
+      }
+    };
+
     const hydrate = async () => {
+      if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') {
+        loadLocalCache();
+        return;
+      }
       try {
         const res = await fetch('/api/state');
-        if (res.ok) {
+        const isJson = (res.headers.get('content-type') || '').includes('application/json');
+        if (res.ok && isJson) {
           const data = (await res.json()) as {
             initialized: boolean;
             club?: ClubSettings;
@@ -93,42 +150,31 @@ export function App() {
                 templates: INITIAL_TEMPLATES,
               }),
             });
-            const seeded = (await seededRes.json()) as {
-              club: ClubSettings;
-              members: MemberProfile[];
-              templates: CommunityTemplate[];
-            };
-            if (!cancelled && seeded.members?.length) {
-              setClub(seeded.club);
-              setMembers(seeded.members);
-              setTemplates(seeded.templates);
+            if ((seededRes.headers.get('content-type') || '').includes('application/json')) {
+              const seeded = (await seededRes.json()) as {
+                club: ClubSettings;
+                members: MemberProfile[];
+                templates: CommunityTemplate[];
+              };
+              if (!cancelled && seeded.members?.length) {
+                setClub(seeded.club);
+                setMembers(seeded.members);
+                setTemplates(seeded.templates);
+              }
+              return;
+            }
+          } else {
+            if (!cancelled) {
+              if (data.club) setClub(data.club);
+              if (data.members?.length) setMembers(data.members);
+              if (data.templates?.length) setTemplates(data.templates);
             }
             return;
           }
-          if (!cancelled) {
-            if (data.club) setClub(data.club);
-            if (data.members?.length) setMembers(data.members);
-            if (data.templates?.length) setTemplates(data.templates);
-          }
-          return;
         }
+        loadLocalCache();
       } catch {
-        // Static deployment fallback (e.g., GitHub Pages / Vercel static)
-        const cached = localStorage.getItem(LOCAL_CACHE_KEY);
-        if (cached && !cancelled) {
-          try {
-            const parsed = JSON.parse(cached) as {
-              club: ClubSettings;
-              members: MemberProfile[];
-              templates: CommunityTemplate[];
-            };
-            if (parsed.club) setClub(parsed.club);
-            if (parsed.members?.length) setMembers(parsed.members);
-            if (parsed.templates?.length) setTemplates(parsed.templates);
-          } catch {
-            // ignore corrupt local cache
-          }
-        }
+        loadLocalCache();
       }
     };
     void hydrate();
@@ -194,20 +240,11 @@ export function App() {
   const handleSaveMember = async (
     updated: MemberProfile
   ): Promise<{ ok: boolean; error?: string }> => {
-    try {
-      const res = await fetch('/api/members', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated),
-      });
-      if (!res.ok) {
-        const err = (await res.json()) as { error?: string };
-        return { ok: false, error: err.error || 'Failed to save profile' };
+    const applyLocally = (): { ok: boolean; error?: string } => {
+      const existing = members.find((m) => m.handle === updated.handle);
+      if (existing?.editPin && existing.editPin !== (updated.editPin || '')) {
+        return { ok: false, error: 'Incorrect Member Edit PIN for this profile.' };
       }
-      const data = (await res.json()) as { members: MemberProfile[] };
-      if (data.members) setMembers(data.members);
-      return { ok: true };
-    } catch {
       setMembers((prev) => {
         const idx = prev.findIndex((m) => m.handle === updated.handle);
         if (idx >= 0) {
@@ -218,6 +255,31 @@ export function App() {
         return [...prev, updated];
       });
       return { ok: true };
+    };
+
+    if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') {
+      return applyLocally();
+    }
+
+    try {
+      const res = await fetch('/api/members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      });
+      const isJson = (res.headers.get('content-type') || '').includes('application/json');
+      if (!isJson) {
+        return applyLocally();
+      }
+      if (!res.ok) {
+        const err = (await res.json()) as { error?: string };
+        return { ok: false, error: err.error || 'Failed to save profile' };
+      }
+      const data = (await res.json()) as { members: MemberProfile[] };
+      if (data.members) setMembers(data.members);
+      return { ok: true };
+    } catch {
+      return applyLocally();
     }
   };
 

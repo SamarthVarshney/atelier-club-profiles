@@ -5,6 +5,11 @@ import type {
   ProfileVisuals,
 } from '../types/profile';
 
+export function mediaAsset(file: string): string {
+  const base = (import.meta.env?.BASE_URL || '/').replace(/\/?$/, '/');
+  return `${base}media/${file}`;
+}
+
 export const INITIAL_CLUB_SETTINGS: ClubSettings = {
   clubName: 'Atelier Collective',
   clubSubhead: 'Creative Computing, Design & Systems Society',
@@ -24,9 +29,9 @@ export const INITIAL_MEMBERS: MemberProfile[] = [
     memberNumber: 'NO. 01',
     location: 'San Francisco / Lab 402',
     joinedAt: '2024-09-01',
-    avatarUrl: '/media/avatar-founder.jpg',
-    bannerUrl: '/media/banner-darkroom.jpg',
-    backgroundMediaUrl: '/media/banner-darkroom.jpg',
+    avatarUrl: mediaAsset('avatar-founder.jpg'),
+    bannerUrl: mediaAsset('banner-darkroom.jpg'),
+    backgroundMediaUrl: mediaAsset('banner-darkroom.jpg'),
     backgroundMediaType: 'image',
     bioLines: [
       'Building tactile tools, compilers & human-crafted interfaces.',
@@ -86,14 +91,14 @@ export const INITIAL_MEMBERS: MemberProfile[] = [
         id: 'trk-1',
         title: 'Darkroom Tungsten Study I',
         artist: 'Atelier Tape Archive',
-        coverUrl: '/media/avatar-sound.jpg',
+        coverUrl: mediaAsset('avatar-sound.jpg'),
         audioUrl: 'synth:darkroom',
       },
       {
         id: 'trk-2',
         title: 'Kyoto Rain Walk (4-Track Loop)',
         artist: 'Atelier Tape Archive',
-        coverUrl: '/media/banner-kyoto.jpg',
+        coverUrl: mediaAsset('banner-kyoto.jpg'),
         audioUrl: 'synth:kyoto',
       },
     ],
@@ -215,7 +220,7 @@ export const INITIAL_MEMBERS: MemberProfile[] = [
       websiteTitle: 'Samarth Varshney — Atelier Dossier No. 01',
       metaDescription: 'Club President & Creative Technologist at Atelier Collective.',
       faviconUrl: '/favicon.svg',
-      ogBannerUrl: '/media/banner-darkroom.jpg',
+      ogBannerUrl: mediaAsset('banner-darkroom.jpg'),
       userInfoOverlay: true,
     },
     analytics: {
@@ -263,9 +268,9 @@ export const INITIAL_MEMBERS: MemberProfile[] = [
     memberNumber: 'NO. 02',
     location: 'Kyoto / Risograph Annex',
     joinedAt: '2024-09-14',
-    avatarUrl: '/media/avatar-design.jpg',
-    bannerUrl: '/media/banner-kyoto.jpg',
-    backgroundMediaUrl: '/media/banner-kyoto.jpg',
+    avatarUrl: mediaAsset('avatar-design.jpg'),
+    bannerUrl: mediaAsset('banner-kyoto.jpg'),
+    backgroundMediaUrl: mediaAsset('banner-kyoto.jpg'),
     backgroundMediaType: 'image',
     bioLines: [
       'Setting type by hand & pixels. Risograph zines, variable fonts, camera repair.',
@@ -324,7 +329,7 @@ export const INITIAL_MEMBERS: MemberProfile[] = [
         id: 'trk-k1',
         title: 'Kyoto Dusk Mist Loop',
         artist: 'Kaori Field Recordings',
-        coverUrl: '/media/avatar-design.jpg',
+        coverUrl: mediaAsset('avatar-design.jpg'),
         audioUrl: 'synth:kyoto',
       },
     ],
@@ -425,7 +430,7 @@ export const INITIAL_MEMBERS: MemberProfile[] = [
       websiteTitle: 'Kaori Takahashi — Print & Typography Lead',
       metaDescription: 'Typography, risograph editions, and 35mm darkroom archive.',
       faviconUrl: '/favicon.svg',
-      ogBannerUrl: '/media/banner-kyoto.jpg',
+      ogBannerUrl: mediaAsset('banner-kyoto.jpg'),
       userInfoOverlay: true,
     },
     analytics: {
@@ -470,9 +475,9 @@ export const INITIAL_MEMBERS: MemberProfile[] = [
     memberNumber: 'NO. 03',
     location: 'Stockholm / Tape Room B',
     joinedAt: '2024-10-02',
-    avatarUrl: '/media/avatar-sound.jpg',
-    bannerUrl: '/media/banner-darkroom.jpg',
-    backgroundMediaUrl: '/media/banner-darkroom.jpg',
+    avatarUrl: mediaAsset('avatar-sound.jpg'),
+    bannerUrl: mediaAsset('banner-darkroom.jpg'),
+    backgroundMediaUrl: mediaAsset('banner-darkroom.jpg'),
     backgroundMediaType: 'image',
     bioLines: [
       'Eurorack circuits, C++ WebAudio DSP & reel-to-reel tape loops.',
@@ -531,14 +536,14 @@ export const INITIAL_MEMBERS: MemberProfile[] = [
         id: 'trk-n1',
         title: 'Buchla Warmth 7.5 IPS',
         artist: 'Niko Lindqvist',
-        coverUrl: '/media/avatar-sound.jpg',
+        coverUrl: mediaAsset('avatar-sound.jpg'),
         audioUrl: 'synth:tape-loop',
       },
       {
         id: 'trk-n2',
         title: 'Sub-Harmonic Sine Study',
         artist: 'Niko Lindqvist',
-        coverUrl: '/media/banner-darkroom.jpg',
+        coverUrl: mediaAsset('banner-darkroom.jpg'),
         audioUrl: 'synth:oscillator',
       },
     ],
@@ -639,7 +644,7 @@ export const INITIAL_MEMBERS: MemberProfile[] = [
       websiteTitle: 'Niko Lindqvist — Modular Sound & DSP',
       metaDescription: 'Eurorack hardware, WebAudio synthesis, and analog tape loops.',
       faviconUrl: '/favicon.svg',
-      ogBannerUrl: '/media/banner-darkroom.jpg',
+      ogBannerUrl: mediaAsset('banner-darkroom.jpg'),
       userInfoOverlay: true,
     },
     analytics: {
@@ -684,9 +689,9 @@ export const INITIAL_MEMBERS: MemberProfile[] = [
     memberNumber: 'NO. 04',
     location: 'Zurich / Server Rack 03',
     joinedAt: '2024-10-19',
-    avatarUrl: '/media/avatar-systems.jpg',
-    bannerUrl: '/media/banner-kyoto.jpg',
-    backgroundMediaUrl: '/media/banner-kyoto.jpg',
+    avatarUrl: mediaAsset('avatar-systems.jpg'),
+    bannerUrl: mediaAsset('banner-kyoto.jpg'),
+    backgroundMediaUrl: mediaAsset('banner-kyoto.jpg'),
     backgroundMediaType: 'image',
     bioLines: [
       'Rust networking, tiny Linux VMs, and self-hosted club infrastructure.',
@@ -745,7 +750,7 @@ export const INITIAL_MEMBERS: MemberProfile[] = [
         id: 'trk-e1',
         title: 'Oscilloscope Harmonic 432',
         artist: 'Lab Telemetry',
-        coverUrl: '/media/avatar-systems.jpg',
+        coverUrl: mediaAsset('avatar-systems.jpg'),
         audioUrl: 'synth:oscillator',
       },
     ],
@@ -826,7 +831,7 @@ export const INITIAL_MEMBERS: MemberProfile[] = [
       websiteTitle: 'Elena Rostova — Distributed Systems Dossier',
       metaDescription: 'Rust networking, Linux virtual machines, and club cluster operations.',
       faviconUrl: '/favicon.svg',
-      ogBannerUrl: '/media/banner-kyoto.jpg',
+      ogBannerUrl: mediaAsset('banner-kyoto.jpg'),
       userInfoOverlay: true,
     },
     analytics: {
@@ -874,10 +879,10 @@ export const INITIAL_TEMPLATES: CommunityTemplate[] = [
     tags: ['Editorial', 'Modern', 'Warm Dark', 'Widgets'],
     visibility: 'public',
     usesCount: 42,
-    previewBannerUrl: '/media/banner-darkroom.jpg',
+    previewBannerUrl: mediaAsset('banner-darkroom.jpg'),
     visuals: INITIAL_MEMBERS[0].visuals,
     splash: INITIAL_MEMBERS[0].splash,
-    backgroundMediaUrl: '/media/banner-darkroom.jpg',
+    backgroundMediaUrl: mediaAsset('banner-darkroom.jpg'),
     backgroundMediaType: 'image',
   },
   {
@@ -889,10 +894,10 @@ export const INITIAL_TEMPLATES: CommunityTemplate[] = [
     tags: ['Typography', 'Rain Shader', 'Serif', 'Minimal'],
     visibility: 'public',
     usesCount: 31,
-    previewBannerUrl: '/media/banner-kyoto.jpg',
+    previewBannerUrl: mediaAsset('banner-kyoto.jpg'),
     visuals: INITIAL_MEMBERS[1].visuals,
     splash: INITIAL_MEMBERS[1].splash,
-    backgroundMediaUrl: '/media/banner-kyoto.jpg',
+    backgroundMediaUrl: mediaAsset('banner-kyoto.jpg'),
     backgroundMediaType: 'image',
   },
   {
@@ -904,10 +909,10 @@ export const INITIAL_TEMPLATES: CommunityTemplate[] = [
     tags: ['Sleek', 'Monospace', 'Hardware', 'Audio'],
     visibility: 'public',
     usesCount: 27,
-    previewBannerUrl: '/media/banner-darkroom.jpg',
+    previewBannerUrl: mediaAsset('banner-darkroom.jpg'),
     visuals: INITIAL_MEMBERS[2].visuals,
     splash: INITIAL_MEMBERS[2].splash,
-    backgroundMediaUrl: '/media/banner-darkroom.jpg',
+    backgroundMediaUrl: mediaAsset('banner-darkroom.jpg'),
     backgroundMediaType: 'image',
   },
   {
@@ -919,10 +924,10 @@ export const INITIAL_TEMPLATES: CommunityTemplate[] = [
     tags: ['Simplistic', 'Linktree Style', 'Systems', 'Clean'],
     visibility: 'public',
     usesCount: 19,
-    previewBannerUrl: '/media/banner-kyoto.jpg',
+    previewBannerUrl: mediaAsset('banner-kyoto.jpg'),
     visuals: INITIAL_MEMBERS[3].visuals,
     splash: INITIAL_MEMBERS[3].splash,
-    backgroundMediaUrl: '/media/banner-kyoto.jpg',
+    backgroundMediaUrl: mediaAsset('banner-kyoto.jpg'),
     backgroundMediaType: 'image',
   },
   {
@@ -934,7 +939,7 @@ export const INITIAL_TEMPLATES: CommunityTemplate[] = [
     tags: ['Floating', 'Zero Glass', 'Cinema', 'Serif'],
     visibility: 'public',
     usesCount: 24,
-    previewBannerUrl: '/media/banner-darkroom.jpg',
+    previewBannerUrl: mediaAsset('banner-darkroom.jpg'),
     visuals: {
       ...INITIAL_MEMBERS[0].visuals,
       layout: 'default',
@@ -953,7 +958,7 @@ export const INITIAL_TEMPLATES: CommunityTemplate[] = [
       subText: '[ FULL-BLEED AUDIOVISUAL MODE ]',
       blurAmount: 24,
     },
-    backgroundMediaUrl: '/media/banner-darkroom.jpg',
+    backgroundMediaUrl: mediaAsset('banner-darkroom.jpg'),
     backgroundMediaType: 'image',
   },
 ];
@@ -973,10 +978,10 @@ export function createNewMemberDossier(params: {
     .slice(0, 28) || `member${params.memberIndex}`;
   const tpl = params.template || INITIAL_TEMPLATES[0];
   const avatars = [
-    '/media/avatar-founder.jpg',
-    '/media/avatar-design.jpg',
-    '/media/avatar-sound.jpg',
-    '/media/avatar-systems.jpg',
+    mediaAsset('avatar-founder.jpg'),
+    mediaAsset('avatar-design.jpg'),
+    mediaAsset('avatar-sound.jpg'),
+    mediaAsset('avatar-systems.jpg'),
   ];
   const chosenAvatar = avatars[(params.memberIndex - 1) % avatars.length];
 

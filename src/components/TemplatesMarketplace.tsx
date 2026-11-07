@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Check, Eye, Layers, Plus, Sparkles } from 'lucide-react';
+import { mediaAsset } from '../data/seedData';
 import type { CommunityTemplate, MemberProfile } from '../types/profile';
 import { DossierRenderer } from './DossierRenderer';
 
@@ -70,7 +71,7 @@ export const TemplatesMarketplace: React.FC<{
         .filter(Boolean),
       visibility: tplVisibility,
       usesCount: 1,
-      previewBannerUrl: targetMember.bannerUrl || '/media/banner-darkroom.jpg',
+      previewBannerUrl: targetMember.bannerUrl || mediaAsset('banner-darkroom.jpg'),
       visuals: structuredClone(targetMember.visuals),
       splash: structuredClone(targetMember.splash),
       backgroundMediaUrl: targetMember.backgroundMediaUrl,

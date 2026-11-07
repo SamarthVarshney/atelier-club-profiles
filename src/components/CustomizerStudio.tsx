@@ -28,6 +28,7 @@ import {
   type SocialPlatform,
   type UsernameEffect,
 } from '../types/profile';
+import { mediaAsset } from '../data/seedData';
 import { BADGE_META, PLATFORM_META } from '../utils/platformIcons';
 import { DossierRenderer } from './DossierRenderer';
 
@@ -105,31 +106,25 @@ export const CustomizerStudio: React.FC<{
 
   const handleAssetUpload = async (slotId: string, file: File | undefined) => {
     if (!file) return;
-    setStatusNote(`Uploading ${file.name} to ${slotId} slot...`);
-    try {
-      const res = await fetch(
-        `/api/upload?slot=${encodeURIComponent(slotId)}&filename=${encodeURIComponent(file.name)}`,
-        {
-          method: 'POST',
-          body: file,
-        }
-      );
-      const data = (await res.json()) as {
-        url?: string;
-        error?: string;
-        mediaType?: 'image' | 'video' | 'audio';
-      };
-      if (!res.ok || !data.url) {
-        setStatusNote(data.error || 'Upload failed.');
-        return;
-      }
+    const slotMeta = ASSET_UPLOAD_SLOTS.find((s) => s.id === slotId);
+    if (slotMeta && file.size > slotMeta.maxMb * 1024 * 1024) {
+      setStatusNote(`File exceeds ${slotMeta.maxMb}MB limit for ${slotMeta.label}.`);
+      return;
+    }
 
-      const uploadedUrl = data.url;
+    const applyUploadedAsset = (
+      uploadedUrl: string,
+      inferredType?: 'image' | 'video' | 'audio' | 'font'
+    ) => {
+      const isVid =
+        inferredType === 'video' ||
+        file.type.startsWith('video/') ||
+        /\.(mp4|m4v|webm|mov|mkv)$/i.test(file.name);
       setDraft((prev) => {
         const next = structuredClone(prev);
         if (slotId === 'background') {
           next.backgroundMediaUrl = uploadedUrl;
-          next.backgroundMediaType = data.mediaType === 'video' ? 'video' : 'image';
+          next.backgroundMediaType = isVid ? 'video' : 'image';
         } else if (slotId === 'avatar') {
           next.avatarUrl = uploadedUrl;
         } else if (slotId === 'banner') {
@@ -169,8 +164,53 @@ export const CustomizerStudio: React.FC<{
         return next;
       });
       setStatusNote(`Uploaded ${file.name} (${slotId}). Click Save to publish.`);
+    };
+
+    const fallbackToClientMedia = () => {
+      if (file.size > 4 * 1024 * 1024) {
+        applyUploadedAsset(URL.createObjectURL(file));
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          applyUploadedAsset(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    };
+
+    setStatusNote(`Uploading ${file.name} to ${slotId} slot...`);
+    if (window.location.protocol !== 'http:' && window.location.protocol !== 'https:') {
+      fallbackToClientMedia();
+      return;
+    }
+
+    try {
+      const res = await fetch(
+        `/api/upload?slot=${encodeURIComponent(slotId)}&filename=${encodeURIComponent(file.name)}`,
+        {
+          method: 'POST',
+          body: file,
+        }
+      );
+      const isJson = (res.headers.get('content-type') || '').includes('application/json');
+      if (!isJson) {
+        fallbackToClientMedia();
+        return;
+      }
+      const data = (await res.json()) as {
+        url?: string;
+        error?: string;
+        mediaType?: 'image' | 'video' | 'audio' | 'font';
+      };
+      if (!res.ok || !data.url) {
+        setStatusNote(data.error || 'Upload failed.');
+        return;
+      }
+      applyUploadedAsset(data.url, data.mediaType);
     } catch {
-      setStatusNote('Upload error — check file size and extension.');
+      fallbackToClientMedia();
     }
   };
 
@@ -516,8 +556,8 @@ export const CustomizerStudio: React.FC<{
                         })
                       }
                     >
-                      <option value="/media/banner-darkroom.jpg">35mm Darkroom Desk</option>
-                      <option value="/media/banner-kyoto.jpg">Kyoto Brutalist Rain</option>
+                      <option value={mediaAsset('banner-darkroom.jpg')}>35mm Darkroom Desk</option>
+                      <option value={mediaAsset('banner-kyoto.jpg')}>Kyoto Brutalist Rain</option>
                       <option value="">Solid Obsidian (No Image)</option>
                     </select>
                   </div>
@@ -528,10 +568,10 @@ export const CustomizerStudio: React.FC<{
                       value={draft.avatarUrl}
                       onChange={(e) => setDraft({ ...draft, avatarUrl: e.target.value })}
                     >
-                      <option value="/media/avatar-founder.jpg">Risograph Technologist</option>
-                      <option value="/media/avatar-design.jpg">Linocut Rangefinder</option>
-                      <option value="/media/avatar-sound.jpg">Vacuum Tube Synth</option>
-                      <option value="/media/avatar-systems.jpg">Oscilloscope Blueprint</option>
+                      <option value={mediaAsset('avatar-founder.jpg')}>Risograph Technologist</option>
+                      <option value={mediaAsset('avatar-design.jpg')}>Linocut Rangefinder</option>
+                      <option value={mediaAsset('avatar-sound.jpg')}>Vacuum Tube Synth</option>
+                      <option value={mediaAsset('avatar-systems.jpg')}>Oscilloscope Blueprint</option>
                     </select>
                   </div>
                 </div>
