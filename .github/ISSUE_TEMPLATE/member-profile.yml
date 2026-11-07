@@ -1,0 +1,35 @@
+name: Claim Club Member Profile
+description: Request or submit a new member dossier (@handle) for the club directory
+title: "[Member Dossier]: @"
+labels: ["member-onboarding"]
+body:
+  - type: input
+    id: handle
+    attributes:
+      label: Desired Handle (/@handle)
+      placeholder: alex-chen
+    validations:
+      required: true
+  - type: input
+    id: display_name
+    attributes:
+      label: Display Name & Club Role
+      placeholder: Alex Chen — Hardware & Embedded Lead
+    validations:
+      required: true
+  - type: dropdown
+    id: layout
+    attributes:
+      label: Preferred Structural Layout
+      options:
+        - modern (2-Tab with Live Widgets)
+        - default (Classic Centered Dossier)
+        - simplistic (Wide Editorial Buttons)
+        - sleek (Horizontal Studio Credential)
+    validations:
+      required: true
+  - type: textarea
+    id: exported_json
+    attributes:
+      label: Exported Dossier JSON (from /customize -> Export JSON)
+      description: Paste your exported JSON config from the Studio Customizer if you already styled your page.

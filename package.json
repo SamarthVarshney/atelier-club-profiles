@@ -1,0 +1,29 @@
+{
+  "name": "atelier-club-profiles",
+  "private": false,
+  "version": "1.0.0",
+  "description": "Multi-member interactive club dossier & biolink customizer with Dark Editorial Studio theme, 4 layouts, Lanyard WebSocket Discord presence, audio deck, and analytics.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "start": "node server/prod-server.mjs",
+    "lint": "oxlint",
+    "test": "node --test tests/studio.test.mjs",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lucide-react": "^1.0.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "oxlint": "^1.90.0",
+    "typescript": "~7.0.2",
+    "vite": "^8.3.6"
+  }
+}
