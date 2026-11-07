@@ -438,6 +438,26 @@ export const CustomizerStudio: React.FC<{
                     }
                   />
                 </div>
+                <div className="field-group">
+                  <label className="field-label">Splash Gate Typeface</label>
+                  <select
+                    className="studio-select"
+                    value={draft.splash.fontFamily || ''}
+                    onChange={(e) =>
+                      setDraft({
+                        ...draft,
+                        splash: { ...draft.splash, fontFamily: e.target.value },
+                      })
+                    }
+                  >
+                    <option value="">Inherit Editorial Display Font</option>
+                    {CURATED_EDITORIAL_FONTS.map((f) => (
+                      <option key={f.value} value={f.value}>
+                        {f.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <div className="field-row-2">
                   <div className="field-group">
                     <div className="field-label">
@@ -1252,6 +1272,28 @@ export const CustomizerStudio: React.FC<{
                       className="studio-range"
                       value={draft.visuals.bannerRadius}
                       onChange={(e) => updateVisuals('bannerRadius', Number(e.target.value))}
+                    />
+                  </div>
+                </div>
+
+                <div className="field-group">
+                  <label className="field-label">Card Border Color</label>
+                  <div className="color-picker-wrap">
+                    <input
+                      type="color"
+                      value={
+                        /^#[0-9a-fA-F]{6}$/.test(draft.visuals.borderColor)
+                          ? draft.visuals.borderColor
+                          : '#3d3730'
+                      }
+                      onChange={(e) => updateVisuals('borderColor', e.target.value)}
+                    />
+                    <input
+                      className="studio-input"
+                      style={{ flex: 1, fontFamily: 'var(--font-mono)', fontSize: '0.76rem' }}
+                      value={draft.visuals.borderColor}
+                      onChange={(e) => updateVisuals('borderColor', e.target.value)}
+                      placeholder="#3d3730 or rgba(242, 236, 225, 0.22)"
                     />
                   </div>
                 </div>

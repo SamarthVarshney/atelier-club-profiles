@@ -101,12 +101,18 @@ test('Atelier Club API: seed, multi-member upsert, PIN guard, telemetry, and ass
     const clickJson = await clickRes.json();
     assert.ok(clickJson.member.analytics.totalClicks >= 1);
 
-    // 5. Reject unsupported file extension & accept valid SVG badge upload
+    // 5. Reject unsupported or cross-slot file extension & accept valid SVG badge upload
     const badUpload = await fetch(`${baseUrl}/api/upload?slot=badge&filename=script.exe`, {
       method: 'POST',
       body: Buffer.from('bad'),
     });
     assert.equal(badUpload.status, 400);
+
+    const wrongSlotUpload = await fetch(`${baseUrl}/api/upload?slot=avatar&filename=track.mp3`, {
+      method: 'POST',
+      body: Buffer.from('audio-bytes'),
+    });
+    assert.equal(wrongSlotUpload.status, 400);
 
     const okUpload = await fetch(`${baseUrl}/api/upload?slot=badge&filename=emblem.svg`, {
       method: 'POST',

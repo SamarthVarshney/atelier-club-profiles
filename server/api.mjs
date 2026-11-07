@@ -22,6 +22,18 @@ const SLOT_MAX_MB = {
   badge: 10,
 };
 
+const SLOT_ALLOWED_EXTS = {
+  background: ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.mp4', '.m4v', '.webm', '.mov', '.mkv'],
+  audio: ['.mp3', '.aac'],
+  avatar: ['.png', '.jpg', '.jpeg', '.gif', '.webp'],
+  banner: ['.png', '.jpg', '.jpeg', '.gif', '.webp'],
+  cursor: ['.cur', '.png', '.jpg', '.jpeg', '.gif', '.webp'],
+  font: ['.ttf', '.otf', '.woff', '.woff2'],
+  cover: ['.png', '.jpg', '.jpeg', '.gif', '.webp'],
+  metadata: ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.ico', '.svg'],
+  badge: ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg'],
+};
+
 const MIME_BY_EXT = {
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
@@ -208,8 +220,12 @@ export function createClubApiMiddleware() {
           sendJson(res, 200, { ok: false });
           return;
         }
+        const targetHandle = String(handle || '').trim().toLowerCase();
         const member = db.members.find(
-          (m) => m.handle === handle || (Array.isArray(m.aliases) && m.aliases.includes(handle))
+          (m) =>
+            m.handle === targetHandle ||
+            (Array.isArray(m.aliases) &&
+              m.aliases.some((a) => String(a).trim().toLowerCase() === targetHandle))
         );
         if (member && member.analytics) {
           member.analytics.totalViews = (member.analytics.totalViews || 0) + 1;
@@ -240,7 +256,13 @@ export function createClubApiMiddleware() {
           sendJson(res, 200, { ok: false });
           return;
         }
-        const member = db.members.find((m) => m.handle === handle);
+        const targetHandle = String(handle || '').trim().toLowerCase();
+        const member = db.members.find(
+          (m) =>
+            m.handle === targetHandle ||
+            (Array.isArray(m.aliases) &&
+              m.aliases.some((a) => String(a).trim().toLowerCase() === targetHandle))
+        );
         if (member && member.analytics) {
           member.analytics.totalClicks = (member.analytics.totalClicks || 0) + 1;
           if (platform) {
@@ -290,10 +312,11 @@ export function createClubApiMiddleware() {
         const slot = parsedUrl.searchParams.get('slot') || 'avatar';
         const origName = parsedUrl.searchParams.get('filename') || 'asset.bin';
         const maxMb = SLOT_MAX_MB[slot] || 10;
+        const allowedExts = SLOT_ALLOWED_EXTS[slot];
         const ext = path.extname(origName).toLowerCase();
-        if (!MIME_BY_EXT[ext]) {
+        if (!MIME_BY_EXT[ext] || (allowedExts && !allowedExts.includes(ext))) {
           sendJson(res, 400, {
-            error: `Unsupported file extension "${ext}" for slot "${slot}".`,
+            error: `Unsupported file extension "${ext}" for slot "${slot}". Allowed: ${(allowedExts || Object.keys(MIME_BY_EXT)).join(', ')}`,
           });
           return;
         }
@@ -313,6 +336,8 @@ export function createClubApiMiddleware() {
             ? 'video'
             : MIME_BY_EXT[ext].startsWith('audio/')
             ? 'audio'
+            : MIME_BY_EXT[ext].startsWith('font/')
+            ? 'font'
             : 'image',
         });
         return;

@@ -256,7 +256,7 @@ export const INITIAL_MEMBERS: MemberProfile[] = [
   },
   {
     handle: 'kaori',
-    aliases: [' editorial', 'print'],
+    aliases: ['editorial', 'print'],
     displayName: 'Kaori Takahashi',
     clubRole: 'Print & Typography Lead',
     department: 'Design',
